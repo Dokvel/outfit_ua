@@ -1,0 +1,17 @@
+.selected {
+  background-color: red;
+}
+
+.language-switcher ul {
+  list-style: none;
+  margin: auto;
+  text-align: right;
+}
+
+.language-switcher li {
+  display: inline-block;
+  margin: 10px;
+  padding: 5px;
+  cursor: pointer;
+  color: black;
+}
