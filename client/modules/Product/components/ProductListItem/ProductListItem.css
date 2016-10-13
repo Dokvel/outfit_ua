@@ -1,9 +1,10 @@
 .container {
-  cursor: pointer;
   width: 250px;
 }
 
 .container .picture {
+
+  cursor: pointer;
   width: 100%;
   background-size: contain;
   background-position: center;
@@ -17,6 +18,8 @@
 }
 
 .container .info {
+
+  cursor: pointer;
   padding: 10px 0;
   width: 100%;
 }

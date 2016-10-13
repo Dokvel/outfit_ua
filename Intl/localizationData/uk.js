@@ -15,6 +15,9 @@ export default {
     categoryName: 'Назва категорії',
     createNewCategory: 'Створити нову категорію',
     submit: 'Додати',
+    edit: 'Редагувати',
+    cart: 'Кошик',
+    order: 'Замовити',
     comment: `user {name} {value, plural,
     	  =0 {does not have any comments}
     	  =1 {has # comment}
@@ -30,5 +33,6 @@ export default {
   		  =1 {has # comment}
   		  other {has # comments}
   		} as of {date} (in real app this would be translated to French)`,
+    categoriesBarHeader: 'Найменування'
   },
 };

@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { getProductsCount } from '../Cart/CartReducer';
 
 // Import Style
 import styles from './App.css';
@@ -12,6 +13,8 @@ import Footer from './components/Footer/Footer';
 
 // Import Actions
 import { toggleAddPost } from './AppActions';
+import { fetchCategories } from '../Category/CategoryActions';
+import { restoreCartFromCache } from '../Cart/CartActions';
 import { switchLanguage } from '../../modules/Intl/IntlActions';
 
 export class App extends Component {
@@ -21,7 +24,9 @@ export class App extends Component {
   }
 
   componentDidMount() {
-    this.setState({isMounted: true}); // eslint-disable-line
+    this.props.dispatch(restoreCartFromCache());
+    this.props.dispatch(fetchCategories());
+    this.setState({ isMounted: true }); // eslint-disable-line
   }
 
   toggleAddPostSection = () => {
@@ -31,7 +36,7 @@ export class App extends Component {
   render() {
     return (
       <div>
-        {this.state.isMounted && !window.devToolsExtension && process.env.NODE_ENV === 'development' && <DevTools />}
+        {/*this.state.isMounted && !window.devToolsExtension && process.env.NODE_ENV === 'development' && <DevTools />*/}
         <div className={styles.container}>
           <Helmet
             title="MERN Starter - Blog App"
@@ -51,6 +56,7 @@ export class App extends Component {
           <Header
             switchLanguage={lang => this.props.dispatch(switchLanguage(lang))}
             intl={this.props.intl}
+            cartProductsCount={this.props.cartProductsCount}
           />
           <div>
             {this.props.children}
@@ -62,6 +68,10 @@ export class App extends Component {
   }
 }
 
+App.need = [() => {
+  return fetchCategories();
+}];
+
 App.propTypes = {
   children: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
@@ -70,8 +80,10 @@ App.propTypes = {
 
 // Retrieve data from store as props
 function mapStateToProps(store) {
+  let cartProductsCount = getProductsCount(store)
   return {
     intl: store.intl,
+    cartProductsCount
   };
 }
 

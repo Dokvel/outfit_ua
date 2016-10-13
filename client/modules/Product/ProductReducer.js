@@ -1,4 +1,4 @@
-import { ADD_PRODUCTS, ADD_PRODUCT } from './ProductActions';
+import { ADD_PRODUCTS, ADD_PRODUCT, REPLACE_PRODUCT } from './ProductActions';
 
 // Initial State
 const initialState = { data: [] };
@@ -14,6 +14,11 @@ const ProductReducer = (state = initialState, action) => {
       return {
         ...state,
         data: [action.product, ...state.data],
+      };
+    case REPLACE_PRODUCT:
+      return {
+        ...state,
+        data: state.data.map(obj => action.product.cuid === obj.cuid ? action.product : obj),
       };
 
     default:

@@ -2,21 +2,28 @@ import React, { PropTypes, Component } from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
+
+import { Link } from 'react-router';
 import styles from './ProductDetailPage.css'
 import { ModalContainer, ModalDialog } from 'react-modal-dialog';
+import { addToCart } from '../../../Cart/CartActions'
 
 // Import Selectors
 import { getProduct } from '../../ProductReducer';
 
 export class ProductDetailPage extends Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = { isShowingModal: false }
   }
 
   handleClick = () => this.setState({ isShowingModal: true });
 
   handleClose = () => this.setState({ isShowingModal: false });
+
+  addProductToCart = () => {
+    this.props.dispatch(addToCart(this.props.product.cuid))
+  };
 
   render() {
     return (
@@ -26,7 +33,8 @@ export class ProductDetailPage extends Component {
         <div className={styles['product']}>
           <div className={styles.photos}>{
             this.props.product && this.props.product.photos.map((photo) => {
-              return (<div className={styles.picture}><img src={`/uploads/products/art_${this.props.product.code}/${photo.fileName}`}/></div>);
+              return (<div className={styles.picture}><img
+                src={`/uploads/products/art_${this.props.product.code}/${photo.fileName}`}/></div>);
             })
           }
           </div>
@@ -36,6 +44,10 @@ export class ProductDetailPage extends Component {
             <div className={styles.price}>{this.props.product.price + ' грн'}</div>
             <div className={styles.price}>{(this.props.product.price * 0.95) + ' грн'}</div>
             <div className={styles.description}>{this.props.product.description}</div>
+            <Link to={`/products/${this.props.product.cuid}/edit`}><FormattedMessage id="edit"/></Link>
+            <div onClick={this.addProductToCart}>
+              <FormattedMessage id="order"/>
+            </div>
           </div>
         </div>
         <div className={styles['useful-info']}>
