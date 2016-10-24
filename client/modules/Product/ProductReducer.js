@@ -29,7 +29,15 @@ const ProductReducer = (state = initialState, action) => {
 /* Selectors */
 
 // Get all products
-export const getProducts = state => state.products.data;
+export const getProducts = (state, isSale = false, group = '') => {
+  if (isSale) {
+    return state.products.data.filter(product => product.isSale === true);
+  } else if (group !== '') {
+    return state.products.data.filter(product => product.group === group);
+  } else {
+    return state.products.data;
+  }
+};
 
 // Get product by cuid
 export const getProduct = (state, cuid) => state.products.data.filter(product => product.cuid === cuid)[0];

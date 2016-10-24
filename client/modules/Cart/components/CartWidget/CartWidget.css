@@ -1,0 +1,8 @@
+.photo {
+  width: 100px;
+}
+
+.photo img {
+  height: auto;
+  max-width: 100%;
+}

@@ -7,6 +7,19 @@ import { getCart, getOrdersAmount } from '../../CartReducer';
 import { getCategory } from '../../../Category/CategoryReducer';
 import { removeFromCart } from '../../CartActions';
 import { getProduct } from '../../../Product/ProductReducer'
+import { FormattedMessage } from 'react-intl';
+import { getProductFilesPath } from '../../../../util/productHelpers';
+import styles from "./CartWidget.css";
+
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableHeaderColumn,
+  TableRow,
+  TableRowColumn,
+  TableFooter
+} from 'material-ui/Table';
 
 class CartWidget extends Component {
 
@@ -16,18 +29,38 @@ class CartWidget extends Component {
 
   render() {
     return (
-      <div>
-        {
-          this.props.products.map(product => (
-            <div>
-              <div>{`${product.code} ${product.category.name} ${this.props.cart[product.cuid].count} x ${product.price} = ${this.props.cart[product.cuid].count * product.price}`}
-                <span
-                  onClick={this.removeProductFromCart.bind(null, product.cuid)}>Удалить</span></div>
-            </div>
-          ))
-        }
-        <div>Сумма заказа: {this.props.ordersAmount}</div>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHeaderColumn><FormattedMessage id="photo"/></TableHeaderColumn>
+            <TableHeaderColumn><FormattedMessage id="productCategory"/></TableHeaderColumn>
+            <TableHeaderColumn><FormattedMessage id="productPrice"/></TableHeaderColumn>
+            <TableHeaderColumn><FormattedMessage id="count"/></TableHeaderColumn>
+            <TableHeaderColumn><FormattedMessage id="actions"/></TableHeaderColumn>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {
+            this.props.products.map(product => (
+              <TableRow>
+                <TableRowColumn>
+                  <div className={styles.photo}>
+                    <img src={`${getProductFilesPath(product)}/${product.photos[0].fileName}`}/>
+                  </div>
+                </TableRowColumn>
+                <TableRowColumn>{product.code}</TableRowColumn>
+                <TableRowColumn>{product.price} грн</TableRowColumn>
+                <TableRowColumn>{this.props.cart[product.cuid].count}</TableRowColumn>
+                <TableRowColumn>
+                  <span onClick={this.removeProductFromCart.bind(null, product.cuid)}>Удалить</span></TableRowColumn>
+              </TableRow>
+            ))
+          }
+        </TableBody>
+        <TableFooter>
+          <div>Сумма заказа: {this.props.ordersAmount}</div>
+        </TableFooter>
+      </Table>
     )
   }
 }
@@ -38,7 +71,7 @@ function mapStateToProps(state) {
   let ordersAmount = getOrdersAmount(state);
   let products = Object.keys(cart).map(productCuid => {
     let product = getProduct(state, productCuid);
-    return {...product, category: getCategory(state, product.category)};
+    return { ...product };
   });
   return {
     cart,

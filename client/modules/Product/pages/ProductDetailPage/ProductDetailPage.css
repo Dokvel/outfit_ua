@@ -1,21 +1,40 @@
 .container .product .photos .picture {
-  width: 150px;
+  width: 100px;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-
 }
 
-.container .product .photos .picture img {
+.container .product .photos .picture img,
+.container .product .photos .big-picture img {
   height: auto;
   max-width: 100%;
+  cursor: zoom-in;
+}
+
+.container .product .photos .big-picture {
+  width: 300px;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  margin-left: 20px;
 }
 
 .container .product .photos {
+
+  background-color: #eaedf4;
   display: flex;
   flex-flow: row wrap;
-  justify-content: space-between;
-  flex: 1 60%;
+  height: 500px;
+}
+
+.container .product .photos .previews {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  overflow-y: scroll;
+  margin-left: 20px;
 }
 
 .container .product {
@@ -32,6 +51,7 @@
 .container {
   display: flex;
 }
+
 .container .product .info {
   flex: 1 40%;
   display: flex;

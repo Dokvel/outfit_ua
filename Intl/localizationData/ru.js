@@ -8,16 +8,24 @@ export default {
     by: 'By',
     deletePost: 'Delete Post',
     createNewProduct: 'Добавить товар',
-    productName: 'Наименование',
+    productName: 'Название',
+    productCategory: 'Наименование',
+    productGroup: 'Группа',
     productCode: 'Артикул',
     productDescription: 'Описание',
     productPrice: 'Цена',
+    productSale: 'Распродажа',
     categoryName: 'Название категории',
+    loginForm: 'Авторизация',
+    registrationForm: 'Регистрация',
+    userLogin: 'Электронный адресс',
+    userPassword: 'Пароль',
     createNewCategory: 'Создать новую категорию',
     submit: 'Добавить',
     edit: 'Редактировать',
     cart: 'Корзина',
     order: 'Заказать',
+    imageCountSeparator: ' из ',
     comment: `user {name} {value, plural,
     	  =0 {does not have any comments}
     	  =1 {has # comment}
@@ -33,6 +41,12 @@ export default {
     	  =1 {has # comment}
     	  other {has # comments}
     	} as of {date}`,
-    categoriesBarHeader: 'Наиминование'
+    categoriesBarHeader: 'Наиминование',
+    groups: {
+      women: 'WOMEN',
+      girls: 'GIRLS',
+      nenka: 'NENKA',
+      sale: 'SALE',
+    }
   },
 };

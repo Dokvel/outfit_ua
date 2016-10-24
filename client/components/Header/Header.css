@@ -15,3 +15,10 @@
   cursor: pointer;
   color: black;
 }
+.groups{
+  display: flex;
+  flex-flow: row;
+  justify-content: space-around;
+  align-items: center;
+  margin: 10px 0;
+}

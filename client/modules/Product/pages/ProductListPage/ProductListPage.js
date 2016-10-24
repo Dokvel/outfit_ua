@@ -43,10 +43,14 @@ class ProductListPage extends Component {
 }
 
 // Retrieve data from store as props
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
+  let products = getProducts(state, props.route.isSale === true, props.params.groupKey);
+  let categoriesUUIDs = products.map(product => product.category).filter((x, i, a) => a.indexOf(x) == i);
+  let categories = getCategories(state).filter(category => categoriesUUIDs.indexOf(category.cuid) > -1);
+
   return {
-    categories: getCategories(state),
-    products: getProducts(state),
+    categories,
+    products
   };
 }
 

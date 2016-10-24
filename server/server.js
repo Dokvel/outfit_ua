@@ -1,4 +1,4 @@
-import Express from 'express';
+import Express, { Router } from 'express';
 import compression from 'compression';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
@@ -35,9 +35,12 @@ import { fetchComponentData } from './util/fetchData';
 import posts from './routes/post.routes';
 import products from './routes/product.routes';
 import categories from './routes/category.routes';
+import users from './routes/user.routes';
+import auth from './routes/auth.routes';
 import dummyData from './dummyData';
 import serverConfig from './config';
 import { createDir } from  './util/fs-helpers';
+import User from './models/user';
 
 // Set native promises as mongoose promise
 mongoose.Promise = global.Promise;
@@ -56,6 +59,30 @@ mongoose.connect(serverConfig.mongoURL, (error) => {
 //Init directories
 createDir(path.resolve(__dirname, '../' + serverConfig.UPLOADS_DIR));
 
+import passport from 'passport';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+
+var opts = {};
+opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
+opts.secretOrKey = serverConfig.JWT_TOKEN;
+
+passport.use(new JwtStrategy(opts, (jwt_payload, done) => {
+  User.findOne({ cuid: jwt_payload.sub }).then(user => {
+    if (user) {
+      done(null, user);
+    } else {
+      done(null, false);
+    }
+  }).catch(err => {
+    return done(err, false);
+  });
+}));
+
+const useRoutes = (routes) => {
+  let protectedMiddleware = passport.authenticate('jwt', { session: false });
+  app.use('/api', routes(new Router(), protectedMiddleware))
+};
+
 // Apply body Parser and server public assets and routes
 app.use(compression());
 app.use(bodyParser.json({ limit: '20mb' }));
@@ -63,9 +90,10 @@ app.use(bodyParser.urlencoded({ limit: '20mb', extended: false }));
 app.use(Express.static(path.resolve(__dirname, '../dist')));
 app.use('/uploads', Express.static(path.resolve(__dirname, '../uploads')));
 app.use('/api', posts);
-app.use('/api', products);
 app.use('/api', categories);
-
+useRoutes(products);
+useRoutes(users);
+useRoutes(auth);
 
 // Render Initial HTML
 const renderFullPage = (html, initialState) => {
@@ -88,6 +116,7 @@ const renderFullPage = (html, initialState) => {
         ${process.env.NODE_ENV === 'production' ? `<link rel='stylesheet' href='${assetsManifest['/app.css']}' />` : ''}
         <link href='https://fonts.googleapis.com/css?family=Lato:400,300,700' rel='stylesheet' type='text/css'/>
         <link rel="shortcut icon" href="http://res.cloudinary.com/hashnode/image/upload/v1455629445/static_imgs/mern/mern-favicon-circle-fill.png" type="image/png" />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
       </head>
       <body>
         <div id="root">${html}</div>

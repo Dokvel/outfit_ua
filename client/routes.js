@@ -4,6 +4,8 @@ import { Route, IndexRoute, IndexRedirect } from 'react-router';
 import App from './modules/App/App';
 import Product from './modules/Product/Product';
 
+import { isAdmin } from './util/apiCaller';
+
 // require.ensure polyfill for node
 if (typeof require.ensure !== 'function') {
   require.ensure = function requireModule(deps, callback) {
@@ -23,6 +25,12 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/Product/pages/ProductDetailPage/ProductDetailPage');
   require('./modules/Product/pages/ProductFormPage/ProductFormPage');
   require('./modules/Category/pages/CategoryFormPage/CategoryFormPage');
+  require('./modules/User/pages/RegistrationPage/RegistrationPage');
+}
+
+function requireAdmin(nextState, replace) {
+  if (!isAdmin())
+    replace('/sign_in')
 }
 
 // react-router setup with code-splitting
@@ -46,6 +54,22 @@ export default (
         });
       }}
     />
+    <Route
+      path="/registration"
+      getComponent={(nextState, cb) => {
+        require.ensure([], require => {
+          cb(null, require('./modules/User/pages/RegistrationPage/RegistrationPage').default);
+        });
+      }}
+    />
+    <Route
+      path="/sign_in"
+      getComponent={(nextState, cb) => {
+        require.ensure([], require => {
+          cb(null, require('./modules/User/pages/SignInPage/SignInPage').default);
+        });
+      }}
+    />
     <Route path="/products" component={Product}>
       <IndexRoute
         getComponent={(nextState, cb) => {
@@ -54,8 +78,27 @@ export default (
           });
         }}
       />
+      <Route path="group/:groupKey">
+        <IndexRoute
+          getComponent={(nextState, cb) => {
+            require.ensure([], require => {
+              cb(null, require('./modules/Product/pages/ProductListPage/ProductListPage').default);
+            });
+          }}
+        />
+      </Route>
       <Route
-        path="/products/new"
+        path="sale"
+        isSale={true}
+        getComponent={(nextState, cb) => {
+          require.ensure([], require => {
+            cb(null, require('./modules/Product/pages/ProductListPage/ProductListPage').default);
+          });
+        }}
+      />
+      <Route
+        path="new"
+        onEnter={requireAdmin}
         getComponent={(nextState, cb) => {
           require.ensure([], require => {
             cb(null, require('./modules/Product/pages/ProductFormPage/ProductFormPage').default);
@@ -63,7 +106,7 @@ export default (
         }}
       />
       <Route
-        path="/products/:cuid"
+        path=":cuid"
         getComponent={(nextState, cb) => {
           require.ensure([], require => {
             cb(null, require('./modules/Product/pages/ProductDetailPage/ProductDetailPage').default);
@@ -72,6 +115,7 @@ export default (
       />
       <Route
         path="/products/:cuid/edit"
+        onEnter={requireAdmin}
         getComponent={(nextState, cb) => {
           require.ensure([], require => {
             cb(null, require('./modules/Product/pages/ProductFormPage/ProductFormPage').default);

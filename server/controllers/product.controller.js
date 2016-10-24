@@ -28,6 +28,7 @@ export function addProduct(req, res) {
     newProduct.code = sanitizeHtml(newProduct.code);
     newProduct.name = sanitizeHtml(newProduct.name);
     newProduct.description = sanitizeHtml(newProduct.description);
+    newProduct.group = sanitizeHtml(newProduct.group);
 
     newProduct.cuid = cuid();
     for (let i = 0, file; file = req.files[i]; i++) {
@@ -52,6 +53,8 @@ export function updateProduct(req, res) {
         document.name = sanitizeHtml(req.body.product.name);
         document.description = sanitizeHtml(req.body.product.description);
         document.category = req.body.product.category;
+        document.group = req.body.product.group;
+        document.isSale = req.body.product.isSale;
         document.price = req.body.product.price;
 
         for (let i = 0, file; file = req.files[i]; i++) {
