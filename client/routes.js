@@ -78,7 +78,7 @@ export default (
           });
         }}
       />
-      <Route path="group/:groupKey">
+      <Route path="category/:categoryKey">
         <IndexRoute
           getComponent={(nextState, cb) => {
             require.ensure([], require => {
@@ -87,15 +87,24 @@ export default (
           }}
         />
       </Route>
-      <Route
-        path="sale"
-        isSale={true}
-        getComponent={(nextState, cb) => {
-          require.ensure([], require => {
-            cb(null, require('./modules/Product/pages/ProductListPage/ProductListPage').default);
-          });
-        }}
-      />
+      <Route path="group/:groupKey">
+        <IndexRoute
+          getComponent={(nextState, cb) => {
+            require.ensure([], require => {
+              cb(null, require('./modules/Product/pages/ProductListPage/ProductListPage').default);
+            });
+          }}
+        />
+        <Route path="category/:categoryKey">
+          <IndexRoute
+            getComponent={(nextState, cb) => {
+              require.ensure([], require => {
+                cb(null, require('./modules/Product/pages/ProductListPage/ProductListPage').default);
+              });
+            }}
+          />
+        </Route>
+      </Route>
       <Route
         path="new"
         onEnter={requireAdmin}

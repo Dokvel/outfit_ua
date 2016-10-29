@@ -44,12 +44,13 @@ class Header extends Component {
           </div>
         </div>
         <div className={styles.groups}>
+          <Link to={`/products`}><FormattedMessage id={`groups.all`}/></Link>
           {
             groups.map(group => (
               <Link to={`/products/group/${group.key}`}><FormattedMessage id={`groups.${group.key}`}/></Link>
             ))
           }
-          <Link to={`/products/sale`}><FormattedMessage id={`groups.sale`}/></Link>
+          <Link to={`/products/group/sale`}><FormattedMessage id={`groups.sale`}/></Link>
         </div>
         <Dialog
           title={this.props.intl.messages.cart}

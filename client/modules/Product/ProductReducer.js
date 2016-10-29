@@ -29,13 +29,26 @@ const ProductReducer = (state = initialState, action) => {
 /* Selectors */
 
 // Get all products
-export const getProducts = (state, isSale = false, group = '') => {
-  if (isSale) {
-    return state.products.data.filter(product => product.isSale === true);
-  } else if (group !== '') {
-    return state.products.data.filter(product => product.group === group);
-  } else {
+export const getProducts = (state, group = '', category = '') => {
+  const isSale = group === 'sale';
+  if (!isSale && group === '' && category === '') {
     return state.products.data;
+  } else {
+    if (isSale) {
+      if (category !== '') {
+        return state.products.data.filter(product => product.isSale === true && product.category === category);
+      } else {
+        return state.products.data.filter(product => product.isSale === true);
+      }
+    } else if (group !== '' && category !== '') {
+      return state.products.data.filter(product => product.group === group && product.category === category);
+    } else if (group !== '') {
+      return state.products.data.filter(product => product.group === group);
+    } else if (category !== '') {
+      return state.products.data.filter(product => product.category === category);
+    } else {
+      return state.products.data;
+    }
   }
 };
 

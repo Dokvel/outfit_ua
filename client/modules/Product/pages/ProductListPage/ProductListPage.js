@@ -24,7 +24,7 @@ class ProductListPage extends Component {
     return (
       <div className={styles.container}>
         <div className={styles['filter-panel']}>
-          <CategoriesBar {...this.props} onSelect={cuid=>alert(cuid)}/>
+          <CategoriesBar {...this.props}/>
         </div>
         <div className={styles.products}>
           {
@@ -44,7 +44,7 @@ class ProductListPage extends Component {
 
 // Retrieve data from store as props
 function mapStateToProps(state, props) {
-  let products = getProducts(state, props.route.isSale === true, props.params.groupKey);
+  let products = getProducts(state, props.params.groupKey, props.params.categoryKey);
   let categoriesUUIDs = products.map(product => product.category).filter((x, i, a) => a.indexOf(x) == i);
   let categories = getCategories(state).filter(category => categoriesUUIDs.indexOf(category.cuid) > -1);
 

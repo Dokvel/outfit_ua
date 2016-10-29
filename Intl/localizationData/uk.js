@@ -47,6 +47,7 @@ export default {
       girls: 'GIRLS',
       nenka: 'NENKA',
       sale: 'SALE',
+      all: 'ALL',
     }
   },
 };
