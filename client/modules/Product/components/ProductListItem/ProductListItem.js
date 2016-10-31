@@ -13,10 +13,11 @@ import styles from './ProductListItem.css';
 function ProductListItem(props) {
   return (
     <Card className={styles.container}>
-      <Link to={`/products/${props.cuid}`}>
+      <Link to={`/products/${props.cuid}-${props.colors[props.defaultColor].code}`}>
         <CardMedia
           overlay={ <CardTitle title={props.name} subtitle={`${props.price}грн`}/>}>
-          <img src={`/uploads/products/art_${props.code}/${props.photos[0] ? props.photos[0].fileName : ''}`}/>
+          <img
+            src={`/uploads/products/art_${props.code}/${props.colors[props.defaultColor] ? props.colors[props.defaultColor].photos[0].fileName : ''}`}/>
         </CardMedia>
       </Link>
     </Card>

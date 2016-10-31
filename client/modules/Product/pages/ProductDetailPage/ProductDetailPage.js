@@ -26,18 +26,27 @@ export class ProductDetailPage extends Component {
     this.props.dispatch(addToCart(this.props.product.cuid))
   };
 
-  getPhotosSrc = (product) => {
-    return product ? product.photos.map(photo => {
+  getPhotosSrc = (product, colorCode) => {
+    let colorCUID = product.defaultColor;
+    if (colorCode) {
+      for (let color in product.colors) {
+        if (product.colors[color].code === colorCode) {
+          colorCUID = color;
+          break;
+        }
+      }
+    }
+    return product ? product.colors[colorCUID].photos.map(photo => {
       return { src: `${getProductFilesPath(product)}/${photo.fileName}` }
     }) : [];
   };
 
   componentDidMount() {
-    this.setState({ photos: this.getPhotosSrc(this.props.product) });
+    this.setState({ photos: this.getPhotosSrc(this.props.product, this.props.params.colorCode) });
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ photos: this.getPhotosSrc(nextProps.product) });
+    this.setState({ photos: this.getPhotosSrc(nextProps.product, nextProps.params.colorCode) });
   }
 
   openPhoto = (currentImage)=> {
@@ -97,6 +106,11 @@ export class ProductDetailPage extends Component {
             <div className={styles.price}>{(this.props.product.price * 0.95) + ' грн'}</div>
             <div className={styles.description}>{this.props.product.description}</div>
             {isAdmin() && <Link to={`/products/${this.props.product.cuid}/edit`}><FormattedMessage id="edit"/></Link>}
+            {Object.keys(this.props.product.colors).map(colorCUID =>(
+              <Link to={`/products/${this.props.product.cuid}-${this.props.product.colors[colorCUID].code}`}>
+                {this.props.product.colors[colorCUID].code}
+              </Link>
+            ))}
             <div onClick={this.addProductToCart}>
               <FormattedMessage id="order"/>
             </div>

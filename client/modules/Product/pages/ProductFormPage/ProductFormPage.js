@@ -8,8 +8,10 @@ import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import Checkbox from 'material-ui/Checkbox';
-import Visibility from 'material-ui/svg-icons/action/visibility';
-import VisibilityOff from 'material-ui/svg-icons/action/visibility-off';
+import ProductColorForm from '../../components/ProductColorForm/ProductColorForm';
+import { Tabs, Tab } from 'material-ui/Tabs';
+
+import cuid from 'cuid';
 
 // Import Style
 import styles from './ProductFormPage.css';
@@ -21,7 +23,9 @@ import { getProduct } from '../../ProductReducer';
 export class ProductFormPage extends Component {
   constructor(props) {
     super(props);
-    this.state = props.product || {}
+    this.state = props.product || {
+        colors: [{ cuid: cuid(), code: 'c01' }]
+      }
   }
 
   onChange = (e) => {
@@ -37,11 +41,21 @@ export class ProductFormPage extends Component {
     form.append('product[description]', this.state.description);
     form.append('product[category]', this.state.category);
     form.append('product[group]', this.state.group);
-    form.append('product[isSale]', this.state.isSale);
+    form.append('product[isSale]', this.state.isSale || false);
+    form.append('product[inactive]', this.state.inactive || false);
+    form.append('product[defaultColor]', this.state.defaultColor);
 
-    for (let i = 0, file; file = this.refs.photos.files[i]; i++) {
-      form.append('product[photos]', file, file.name);
-    }
+    this.state.colors.forEach(color => {
+      for (let colorDataKey in color) {
+        if ('filesPhotos' === colorDataKey) {
+          color.filesPhotos.forEach(file => {
+            form.append(`product[colors][${color.cuid}][filesPhotos]`, file, file.name);
+          });
+        } else {
+          form.append(`product[colors][${color.cuid}][${colorDataKey}]`, color[colorDataKey]);
+        }
+      }
+    });
 
     this.props.dispatch(!this.props.product ? addProductRequest(form) : updateProductRequest(this.props.product.cuid, form))
   };
@@ -54,8 +68,19 @@ export class ProductFormPage extends Component {
     return this.setState({ [event.target.name]: value });
   };
 
-  onFileLoad = (e)=> {
-    console.log(e.target.files);
+  onAddColor = ()=> {
+    let { colors } = this.state;
+    colors.push({ code: 'new-color', cuid: cuid() });
+    this.setState({ colors });
+  };
+
+  onColorChanged = (colorKey, colorData)=> {
+    let { colors } = this.state;
+    const colorIndex = colors.map(o => o.cuid).indexOf(colorKey);
+    if (colorIndex > -1) {
+      colors[colorIndex] = colorData;
+      this.setState({ colors });
+    }
   };
 
   render() {
@@ -63,70 +88,95 @@ export class ProductFormPage extends Component {
       <div className={styles.form}>
         <div className={styles['form-content']}>
           <h2 className={styles['form-title']}><FormattedMessage id="createNewProduct"/></h2>
-          <SelectField
-            floatingLabelText={this.props.intl.messages.productCategory}
-            value={this.state.category}
-            onChange={this.handleSelectChange.bind(null, 'category')}>
-            {
-              this.props.categories.map((category)=> {
-                return (<MenuItem key={category.cuid} value={category.cuid} primaryText={category.name}/>)
-              })
-            }
-          </SelectField><br />
-          <SelectField
-            floatingLabelText={this.props.intl.messages.productGroup}
-            value={this.state.group}
-            onChange={this.handleSelectChange.bind(null, 'group')}>
-            {
-              groups.map(group => {
-                  return (
-                    <MenuItem key={group.key} value={group.key}
-                              primaryText={this.props.intl.messages[`groups.${group.key}`]}/>
+          <Tabs>
+            <Tab label="Shared">
+              <SelectField
+                floatingLabelText={this.props.intl.messages.productCategory}
+                value={this.state.category}
+                onChange={this.handleSelectChange.bind(null, 'category')}>
+                {
+                  this.props.categories.map((category)=> {
+                    return (<MenuItem key={category.cuid} value={category.cuid} primaryText={category.name}/>)
+                  })
+                }
+              </SelectField>
+              <br/>
+              <SelectField
+                floatingLabelText={this.props.intl.messages.productGroup}
+                value={this.state.group}
+                onChange={this.handleSelectChange.bind(null, 'group')}>
+                {
+                  groups.map(group => {
+                      return (
+                        <MenuItem key={group.key} value={group.key}
+                                  primaryText={this.props.intl.messages[`groups.${group.key}`]}/>
+                      )
+                    }
                   )
                 }
-              )
-            }
-          </SelectField><br />
-          <TextField
-            fullWidth={true}
-            floatingLabelText={this.props.intl.messages.productName}
-            defaultValue={this.state.name}
-            onChange={this.onChange} name="name"/><br />
-          <TextField
-            fullWidth={true}
-            floatingLabelText={this.props.intl.messages.productCode}
-            defaultValue={this.state.code}
-            onChange={this.onChange} name="code"/><br />
-          <TextField
-            type="number"
-            fullWidth={true}
-            floatingLabelText={this.props.intl.messages.productPrice}
-            defaultValue={this.state.price}
-            onChange={this.onChange} name="price"/><br />
-          <Checkbox
-            onCheck={this.handleCheckboxChange}
-            name="isSale"
-            checked={this.state.isSale}
-            label={this.props.intl.messages.productSale}
-          /><br />
-          <TextField
-            multiLine={true}
-            fullWidth={true}
-            rows={3}
-            floatingLabelText={this.props.intl.messages.productDescription}
-            defaultValue={this.state.description}
-            onChange={this.onChange} name="description"/><br />
-          <input ref="photos" type="file" onChange={this.onFileLoad} multiple="multiple"/>
-          <div className={styles.photos}>
+              </SelectField>
+              <br/>
+              <SelectField
+                floatingLabelText={this.props.intl.messages.productDefaultColor}
+                value={this.state.defaultColor}
+                onChange={this.handleSelectChange.bind(null, 'defaultColor')}>
+                {
+                  Object.keys(this.state.colors).map((colorKey)=> {
+                    return (<MenuItem key={colorKey} value={colorKey} primaryText={this.state.colors[colorKey].code}/>)
+                  })
+                }
+              </SelectField>
+              <TextField
+                fullWidth={true}
+                floatingLabelText={this.props.intl.messages.productName}
+                defaultValue={this.state.name}
+                onChange={this.onChange} name="name"/><br />
+              <TextField
+                fullWidth={true}
+                floatingLabelText={this.props.intl.messages.productCode}
+                defaultValue={this.state.code}
+                disabled={this.state.cuid !== undefined}
+                onChange={this.onChange} name="code"/><br />
+              <TextField
+                type="number"
+                fullWidth={true}
+                floatingLabelText={this.props.intl.messages.productPrice}
+                defaultValue={this.state.price}
+                onChange={this.onChange} name="price"/><br />
+              <Checkbox
+                onCheck={this.handleCheckboxChange}
+                name="isSale"
+                checked={this.state.isSale}
+                label={this.props.intl.messages.productSale}
+              /><br />
+              <Checkbox
+                onCheck={this.handleCheckboxChange}
+                name="inactive"
+                checked={this.state.inactive}
+                label={this.props.intl.messages.productInactive}
+              /><br />
+              <TextField
+                multiLine={true}
+                fullWidth={true}
+                rowsMax={3}
+                rows={3}
+                floatingLabelText={this.props.intl.messages.productDescription}
+                defaultValue={this.state.description}
+                onChange={this.onChange} name="description"/><br />
+              <a className={styles['post-submit-button']} href="#" onClick={this.addProduct}>
+                <FormattedMessage id="submit"/>
+              </a>
+            </Tab>
             {
-              this.state.photos && this.state.photos.map(photo =>(
-                <div key={photo.fileName} className={styles.picture}>
-                  <img src={`/uploads/products/art_${this.props.product.code}/${photo.fileName}`}/>
-                </div>
+              this.state.colors.map(color => (
+                <Tab label={color.code || 'New Color'}>
+                  <ProductColorForm onChange={this.onColorChanged.bind(null, color.cuid)} colorData={color}
+                                    product={this.state}/>
+                </Tab>
               ))
             }
-          </div>
-          <a className={styles['post-submit-button']} href="#" onClick={this.addProduct}><FormattedMessage id="submit"/></a>
+            <Tab label={'Add New Color'} onActive={this.onAddColor.bind(this)}/>
+          </Tabs>
         </div>
       </div>
     );

@@ -157,6 +157,8 @@ app.use((req, res, next) => {
       return next();
     }
 
+    global.navigator = global.navigator || {};
+    global.navigator.userAgent = global.navigator.userAgent || 'all';
     const store = configureStore();
 
     return fetchComponentData(store, renderProps.components, renderProps.params)

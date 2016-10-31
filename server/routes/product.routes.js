@@ -19,7 +19,7 @@ export default function (router, protectedMiddleware) {
   var storage = multer.diskStorage({
     destination: function (req, file, cb) {
       const productUploadsPath = path.resolve(__dirname, `../../${serverConfig.UPLOADS_DIR}/products/`);
-      const thisProductUploadsPath = productUploadsPath + `/art_${req.body.product.code || 'unknown'}/`
+      const thisProductUploadsPath = productUploadsPath + `/art_${req.body.product.code || 'unknown'}/`;
       createDir(productUploadsPath);
       createDir(thisProductUploadsPath);
       cb(null, thisProductUploadsPath)
@@ -35,7 +35,7 @@ export default function (router, protectedMiddleware) {
   var upload = multer({ storage: storage });
 
   router.get('/products', ProductController.getProducts);
-  router.post('/products', protectedMiddleware, shouldBeAdmin, upload.array('product[photos]', 12), ProductController.addProduct);
-  router.put('/products/:cuid', protectedMiddleware, shouldBeAdmin, upload.array('product[photos]', 12), ProductController.updateProduct);
+  router.post('/products', protectedMiddleware, shouldBeAdmin, upload.any(), ProductController.addProduct);
+  router.put('/products/:cuid', protectedMiddleware, shouldBeAdmin, upload.any(), ProductController.updateProduct);
   return router;
 }

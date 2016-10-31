@@ -7,7 +7,9 @@ export const getProductFilesPath = (product) => {
 };
 
 export const getCategoryLink = (group = '', category = '') => {
-  if (group !== '' && category !== '') {
+  if (group === '' && category === '') {
+    return `/products`;
+  } else if (group !== '' && category !== '') {
     return `/products/group/${group}/category/${category}`;
   } else {
     if (group) {

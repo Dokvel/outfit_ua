@@ -15,6 +15,9 @@ export default {
     productDescription: 'Описание',
     productPrice: 'Цена',
     productSale: 'Распродажа',
+    productInactive: 'Неактивный',
+    productDefaultColor: 'Цвет по-умолчанию',
+    productSourceLink: 'Ссылка на сайт производителя',
     categoryName: 'Название категории',
     loginForm: 'Авторизация',
     registrationForm: 'Регистрация',
@@ -48,6 +51,7 @@ export default {
       nenka: 'NENKA',
       sale: 'SALE',
       all: 'ALL',
-    }
+    },
+    all: 'Все'
   },
 };

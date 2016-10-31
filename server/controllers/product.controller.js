@@ -18,7 +18,7 @@ export function getProducts(req, res) {
 }
 
 export function addProduct(req, res) {
-  if (!req.body.product.name || !req.body.product.code || !req.body.product.price || !req.body.product.description) {
+  if (!req.body.product.code || !req.body.product.price || !req.body.product.description) {
     res.status(403).end();
   } else {
 
@@ -29,11 +29,23 @@ export function addProduct(req, res) {
     newProduct.name = sanitizeHtml(newProduct.name);
     newProduct.description = sanitizeHtml(newProduct.description);
     newProduct.group = sanitizeHtml(newProduct.group);
+    newProduct.colors = Object.values(req.body.product.colors);
 
     newProduct.cuid = cuid();
-    for (let i = 0, file; file = req.files[i]; i++) {
-      newProduct.photos.push({ fileName: file.filename })
-    }
+
+    const existColors = newProduct.colors.map(o => o.cuid);
+
+    req.files.forEach((file) => {
+      var key = file.fieldname.split('[')[2].slice(0, -1);
+      let existColorIndex = existColors.indexOf(key);
+      if (existColorIndex > -1) {
+        if (!newProduct.colors[existColorIndex].photos) {
+          newProduct.colors[existColorIndex].photos = [];
+        }
+        newProduct.colors[existColorIndex].photos.push({ fileName: file.filename });
+      }
+    });
+
     newProduct.save((err, saved) => {
       if (err) {
         res.status(500).send(err);
@@ -46,7 +58,7 @@ export function addProduct(req, res) {
 export function updateProduct(req, res) {
   Product.findOne({ cuid: req.params.cuid })
     .then(document => {
-      if (!document || !req.body.product.name || !req.body.product.price || !req.body.product.description) {
+      if (!document || !req.body.product.price || !req.body.product.description) {
         res.status(403).end();
       } else {
         // Let's sanitize inputs
@@ -56,10 +68,34 @@ export function updateProduct(req, res) {
         document.group = req.body.product.group;
         document.isSale = req.body.product.isSale;
         document.price = req.body.product.price;
+        document.inactive = req.body.product.inactive;
+        document.defaultColor = req.body.product.defaultColor;
 
-        for (let i = 0, file; file = req.files[i]; i++) {
-          document.photos.push({ fileName: file.filename })
-        }
+        let existColors = document.colors.map(o => o.cuid);
+
+        let colors = Object.values(req.body.product.colors);
+
+        colors.forEach((color, index) => {
+          let existColorIndex = existColors.indexOf(color.cuid);
+          if (existColorIndex > -1) {
+            colors[index].photos = document.colors[existColorIndex].photos;
+          }
+        });
+        document.colors = colors;
+
+        existColors = document.colors.map(o => o.cuid);
+
+        req.files.forEach((file) => {
+          var key = file.fieldname.split('[')[2].slice(0, -1);
+          let existColorIndex = existColors.indexOf(key);
+          if (existColorIndex > -1) {
+            if (!document.colors[existColorIndex].photos) {
+              document.colors[existColorIndex].photos = [];
+            }
+            document.colors[existColorIndex].photos.push({ fileName: file.filename });
+          }
+        });
+
         return document.save();
       }
     })

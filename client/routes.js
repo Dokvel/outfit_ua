@@ -115,7 +115,7 @@ export default (
         }}
       />
       <Route
-        path=":cuid"
+        path=":cuid-:colorCode"
         getComponent={(nextState, cb) => {
           require.ensure([], require => {
             cb(null, require('./modules/Product/pages/ProductDetailPage/ProductDetailPage').default);
