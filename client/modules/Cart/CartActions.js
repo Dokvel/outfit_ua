@@ -8,16 +8,16 @@ export const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
 
 export const CACHE_KEY = 'CART';
 
-export function addToCart(productCuid) {
+export function addToCart(productCuid, colorCode, sizeKey) {
   return {
     type: ADD_TO_CART,
-    productCuid,
+    productCuid, colorCode, sizeKey
   };
 }
-export function removeFromCart(productCuid) {
+export function removeFromCart(productCuid, colorCode, sizeKey) {
   return {
     type: REMOVE_FROM_CART,
-    productCuid,
+    productCuid, colorCode, sizeKey
   };
 }
 

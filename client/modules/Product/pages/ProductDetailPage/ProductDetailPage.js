@@ -7,7 +7,7 @@ import {Link} from 'react-router';
 import styles from './ProductDetailPage.css';
 import {addToCart} from '../../../Cart/CartActions';
 import {isAdmin} from '../../../../util/apiCaller';
-import {getProductFilesPath} from '../../../../util/productHelpers';
+import {getProductFilesPath, getColorUuid} from '../../../../util/productHelpers';
 // Import Selectors
 import {getProduct} from '../../ProductReducer';
 
@@ -22,35 +22,27 @@ export class ProductDetailPage extends Component {
   handleClose = () => this.setState({isShowingModal: false});
 
   addProductToCart = () => {
-    this.props.dispatch(addToCart(this.props.product.cuid))
-  };
-
-  getColorUuid = (product, colorCode) => {
-    let colorCUID;
-    if (colorCode) {
-      for (let color in product.colors) {
-        if (product.colors[color].code === colorCode) {
-          colorCUID = color;
-          break;
-        }
-      }
+    if (this.state.selectedSize !== undefined) {
+      this.props.dispatch(addToCart(this.props.product.cuid, this.props.params.colorCode, this.state.selectedSize))
     }
-    return colorCUID;
   };
 
   getPhotosSrc = (product, colorCode) => {
-    let colorCUID = colorCode ? this.getColorUuid(product, colorCode) : product.defaultColor;
+    let colorCUID = colorCode ? getColorUuid(product, colorCode) : product.defaultColor;
     return product ? product.colors[colorCUID].photos.map(photo => {
       return {src: `${getProductFilesPath(product)}/${photo.fileName}`}
     }) : [];
   };
 
   componentDidMount() {
-    this.setState({photos: this.getPhotosSrc(this.props.product, this.props.params.colorCode), selectedSize: ''});
+    this.setState({
+      photos: this.getPhotosSrc(this.props.product, this.props.params.colorCode),
+      selectedSize: undefined
+    });
   };
 
   componentWillReceiveProps(nextProps) {
-    this.setState({photos: this.getPhotosSrc(nextProps.product, nextProps.params.colorCode), selectedSize: ''});
+    this.setState({photos: this.getPhotosSrc(nextProps.product, nextProps.params.colorCode), selectedSize: undefined});
   };
 
   openPhoto = (currentImage) => {
@@ -122,7 +114,7 @@ export class ProductDetailPage extends Component {
               ))
             }
             {
-              this.props.product.colors[this.getColorUuid(this.props.product, this.props.params.colorCode)].sizes.map(sizeKey => (
+              this.props.product.colors[getColorUuid(this.props.product, this.props.params.colorCode)].sizes.map(sizeKey => (
                 <div key={`size_${sizeKey}`} className={''}
                      onClick={this.handleSizeSelect.bind(null, sizeKey)}>{sizeKey}</div>
               ))

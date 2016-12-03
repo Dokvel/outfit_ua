@@ -1,14 +1,14 @@
 /**
  * Created by alex on 09.10.16.
  */
-import React, { PropTypes, Component } from 'react';
-import { connect } from 'react-redux';
-import { getCart, getOrdersAmount } from '../../CartReducer';
-import { getCategory } from '../../../Category/CategoryReducer';
-import { removeFromCart } from '../../CartActions';
-import { getProduct } from '../../../Product/ProductReducer'
-import { FormattedMessage } from 'react-intl';
-import { getProductFilesPath } from '../../../../util/productHelpers';
+import React, {PropTypes, Component} from 'react';
+import {connect} from 'react-redux';
+import {getCart, getOrdersAmount, parseProductPath, generateProductPath} from '../../CartReducer';
+import {getCategory} from '../../../Category/CategoryReducer';
+import {removeFromCart} from '../../CartActions';
+import {getProducts} from '../../../Product/ProductReducer'
+import {FormattedMessage} from 'react-intl';
+import {getProductFilesPath, getColorUuid} from '../../../../util/productHelpers';
 import styles from "./CartWidget.css";
 
 import {
@@ -23,9 +23,9 @@ import {
 
 class CartWidget extends Component {
 
-  removeProductFromCart = (cuid)=> {
-    this.props.dispatch(removeFromCart(cuid));
-  }
+  removeProductFromCart = (cuid, colorCode, size) => {
+    this.props.dispatch(removeFromCart(cuid, colorCode, size));
+  };
 
   render() {
     return (
@@ -41,20 +41,28 @@ class CartWidget extends Component {
         </TableHeader>
         <TableBody>
           {
-            this.props.products.map(product => (
-              <TableRow>
-                <TableRowColumn>
-                  <div className={styles.photo}>
-                    <img src={`${getProductFilesPath(product)}/${product.photos[0].fileName}`}/>
-                  </div>
-                </TableRowColumn>
-                <TableRowColumn>{product.code}</TableRowColumn>
-                <TableRowColumn>{product.price} грн</TableRowColumn>
-                <TableRowColumn>{this.props.cart[product.cuid].count}</TableRowColumn>
-                <TableRowColumn>
-                  <span onClick={this.removeProductFromCart.bind(null, product.cuid)}>Удалить</span></TableRowColumn>
-              </TableRow>
-            ))
+            this.props.cartProducts.map(params => {
+              let product = this.props.products.filter(product => params.productCuid === product.cuid)[0];
+              let colorUUID = getColorUuid(product, params.colorCode);
+              return (
+                <TableRow>
+                  <TableRowColumn>
+                    <div className={styles.photo}>
+                      <img src={`${getProductFilesPath(product)}/${product.colors[colorUUID].photos[0].fileName}`}/>
+                    </div>
+                  </TableRowColumn>
+                  <TableRowColumn>{`${product.cuid} ${params.colorCode} ${params.sizeKey}`}</TableRowColumn>
+                  <TableRowColumn>{product.price} грн</TableRowColumn>
+                  <TableRowColumn>{this.props.cart[generateProductPath(params)].count}</TableRowColumn>
+                  <TableRowColumn>
+                    <span
+                      onClick={this.removeProductFromCart.bind(null, product.cuid, params.colorCode, params.sizeKey)}>
+                      Удалить
+                    </span>
+                  </TableRowColumn>
+                </TableRow>
+              )
+            })
           }
         </TableBody>
         <TableFooter>
@@ -69,13 +77,13 @@ class CartWidget extends Component {
 function mapStateToProps(state) {
   let cart = getCart(state);
   let ordersAmount = getOrdersAmount(state);
-  let products = Object.keys(cart).map(productCuid => {
-    let product = getProduct(state, productCuid);
-    return { ...product };
+  let cartProducts = Object.keys(cart).map(productPath => {
+    return parseProductPath(productPath);
   });
   return {
     cart,
-    products,
+    cartProducts,
+    products: getProducts(state),
     ordersAmount
   };
 }

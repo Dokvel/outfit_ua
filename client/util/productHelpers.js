@@ -19,3 +19,17 @@ export const getCategoryLink = (group = '', category = '') => {
     }
   }
 };
+
+
+export const getColorUuid = (product, colorCode) => {
+  let colorCUID;
+  if (colorCode) {
+    for (let color in product.colors) {
+      if (product.colors[color].code === colorCode) {
+        colorCUID = color;
+        break;
+      }
+    }
+  }
+  return colorCUID;
+};

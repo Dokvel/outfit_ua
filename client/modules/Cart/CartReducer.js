@@ -1,28 +1,31 @@
 /**
  * Created by alex on 09.10.16.
  */
-import { ADD_TO_CART, REPLACE_CART, CACHE_KEY, REMOVE_FROM_CART } from './CartActions';
-import { getProduct } from '../Product/ProductReducer';
+import {ADD_TO_CART, REPLACE_CART, CACHE_KEY, REMOVE_FROM_CART} from './CartActions';
+import {getProduct} from '../Product/ProductReducer';
+import {getColorUuid} from '../../util/productHelpers';
 
 // Initial State
 const initialState = {};
 
 const CartReducer = (state = initialState, action) => {
   let newCart;
+  let path;
   switch (action.type) {
 
     case ADD_TO_CART:
-      newCart = state;
-      if (state[action.productCuid]) {
-        let product = state[action.productCuid];
+      newCart = state; //return current state
+      path = generateProductPath(action);
+      if (state[path]) {
+        let product = state[path];
         newCart = {
           ...state,
-          [action.productCuid]: { ...product, count: product.count + 1 }
+          [path]: {...product, count: product.count + 1}
         };
       } else {
         newCart = {
           ...state,
-          [action.productCuid]: { count: 1 }
+          [path]: {count: 1}
         }
       }
 
@@ -30,16 +33,17 @@ const CartReducer = (state = initialState, action) => {
       return newCart;
 
     case REMOVE_FROM_CART:
-      newCart = state;
-      if (state[action.productCuid]) {
-        let product = state[action.productCuid];
-        delete state[action.productCuid];
+      newCart = state;//return current state
+      path = generateProductPath(action);
+      if (state[path]) {
+        let product = state[path];
+        delete state[path];
         if (product.count < 2) {
-          newCart = { ...state }
+          newCart = {...state}
         } else {
           newCart = {
             ...state,
-            [action.productCuid]: { ...product, count: product.count - 1 }
+            [path]: {...product, count: product.count - 1}
           }
         }
       }
@@ -54,6 +58,16 @@ const CartReducer = (state = initialState, action) => {
   }
 };
 
+export const generateProductPath = (params) => {
+  return `${params.productCuid}_${params.colorCode}_${params.sizeKey}`;
+};
+
+export const parseProductPath = (path = '') => {
+  let parsedPath = path.split('_');
+  return {productCuid: parsedPath[0], colorCode: parsedPath[1], sizeKey: parsedPath[2]};
+};
+
+
 /* Selectors */
 
 // Get all products
@@ -67,9 +81,10 @@ export const getProductsCount = (state) => {
 
 export const getOrdersAmount = (state) => {
   return Object.keys(state.cart).reduce((sum, key) => {
-    let product = getProduct(state, key);
+    let params = parseProductPath(key);
+    let product = getProduct(state, params.productCuid);
     if (!product) return sum;
-    return sum + parseFloat(state.cart[key].count) * getProduct(state, key).price;
+    return sum + parseFloat(state.cart[key].count) * product.price;
   }, 0);
 };
 
