@@ -1,33 +1,32 @@
-import React, { PropTypes, Component } from 'react';
-import { connect } from 'react-redux';
+import React, {PropTypes, Component} from 'react';
+import {connect} from 'react-redux';
 import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
+import {FormattedMessage} from 'react-intl';
 import Lightbox from 'react-images';
-import { Link } from 'react-router';
+import {Link} from 'react-router';
 import styles from './ProductDetailPage.css';
-import { ModalContainer, ModalDialog } from 'react-modal-dialog';
-import { addToCart } from '../../../Cart/CartActions';
-import { isAdmin } from '../../../../util/apiCaller';
-import { getProductFilesPath } from '../../../../util/productHelpers';
+import {addToCart} from '../../../Cart/CartActions';
+import {isAdmin} from '../../../../util/apiCaller';
+import {getProductFilesPath} from '../../../../util/productHelpers';
 // Import Selectors
-import { getProduct } from '../../ProductReducer';
+import {getProduct} from '../../ProductReducer';
 
 export class ProductDetailPage extends Component {
   constructor(props) {
     super(props);
-    this.state = { isShowingModal: false, lightboxIsOpen: false, photos: [], currentImage: 0, currentBigImage: 0 }
+    this.state = {isShowingModal: false, lightboxIsOpen: false, photos: [], currentImage: 0, currentBigImage: 0}
   }
 
-  handleClick = () => this.setState({ isShowingModal: true });
+  handleClick = () => this.setState({isShowingModal: true});
 
-  handleClose = () => this.setState({ isShowingModal: false });
+  handleClose = () => this.setState({isShowingModal: false});
 
   addProductToCart = () => {
     this.props.dispatch(addToCart(this.props.product.cuid))
   };
 
-  getPhotosSrc = (product, colorCode) => {
-    let colorCUID = product.defaultColor;
+  getColorUuid = (product, colorCode) => {
+    let colorCUID;
     if (colorCode) {
       for (let color in product.colors) {
         if (product.colors[color].code === colorCode) {
@@ -36,45 +35,53 @@ export class ProductDetailPage extends Component {
         }
       }
     }
+    return colorCUID;
+  };
+
+  getPhotosSrc = (product, colorCode) => {
+    let colorCUID = colorCode ? this.getColorUuid(product, colorCode) : product.defaultColor;
     return product ? product.colors[colorCUID].photos.map(photo => {
-      return { src: `${getProductFilesPath(product)}/${photo.fileName}` }
+      return {src: `${getProductFilesPath(product)}/${photo.fileName}`}
     }) : [];
   };
 
   componentDidMount() {
-    this.setState({ photos: this.getPhotosSrc(this.props.product, this.props.params.colorCode) });
-  }
+    this.setState({photos: this.getPhotosSrc(this.props.product, this.props.params.colorCode), selectedSize: ''});
+  };
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ photos: this.getPhotosSrc(nextProps.product, nextProps.params.colorCode) });
-  }
-
-  openPhoto = (currentImage)=> {
-    this.setState({ currentImage: currentImage || 0, lightboxIsOpen: true })
+    this.setState({photos: this.getPhotosSrc(nextProps.product, nextProps.params.colorCode), selectedSize: ''});
   };
 
-  closeLightbox = (e)=> {
-    this.setState({ lightboxIsOpen: false })
+  openPhoto = (currentImage) => {
+    this.setState({currentImage: currentImage || 0, lightboxIsOpen: true})
   };
 
-  gotoNextLightboxImage = ()=> {
+  closeLightbox = (e) => {
+    this.setState({lightboxIsOpen: false})
+  };
+
+  gotoNextLightboxImage = () => {
     let currentImage = this.state.currentImage + 1;
-    if (currentImage > this.state.photos.length) {
+    if (currentImage > this.state.photos.length)
       currentImage = 0;
-    }
-    this.setState({ currentImage });
+    this.setState({currentImage});
   };
 
-  gotoPrevLightboxImage = ()=> {
+  gotoPrevLightboxImage = () => {
     let currentImage = this.state.currentImage - 1;
     if (currentImage < 0) {
       currentImage = this.state.photos.length;
     }
-    this.setState({ currentImage });
+    this.setState({currentImage});
   };
 
-  onHoverPicture = (index, e)=> {
-    this.setState({ currentBigImage: index || 0 })
+  onHoverPicture = (index, e) => {
+    this.setState({currentBigImage: index || 0})
+  };
+
+  handleSizeSelect = (sizeKey, e) => {
+    this.setState({selectedSize: sizeKey})
   };
 
   render() {
@@ -90,7 +97,7 @@ export class ProductDetailPage extends Component {
             <div className={styles['previews']}>
               {
                 this.state.photos.map((photo, index) => (
-                    <div onClick={this.openPhoto.bind(null, index)} className={styles.picture}
+                    <div key={`photo_${index}`} onClick={this.openPhoto.bind(null, index)} className={styles.picture}
                          onMouseOver={this.onHoverPicture.bind(null, index)}>
                       <img src={photo.src}/>
                     </div>
@@ -106,11 +113,20 @@ export class ProductDetailPage extends Component {
             <div className={styles.price}>{(this.props.product.price * 0.95) + ' грн'}</div>
             <div className={styles.description}>{this.props.product.description}</div>
             {isAdmin() && <Link to={`/products/${this.props.product.cuid}/edit`}><FormattedMessage id="edit"/></Link>}
-            {Object.keys(this.props.product.colors).map(colorCUID =>(
-              <Link to={`/products/${this.props.product.cuid}-${this.props.product.colors[colorCUID].code}`}>
-                {this.props.product.colors[colorCUID].code}
-              </Link>
-            ))}
+            {
+              Object.keys(this.props.product.colors).map(colorCUID => (
+                <Link key={`color_${colorCUID}`}
+                      to={`/products/${this.props.product.cuid}-${this.props.product.colors[colorCUID].code}`}>
+                  {this.props.product.colors[colorCUID].code}
+                </Link>
+              ))
+            }
+            {
+              this.props.product.colors[this.getColorUuid(this.props.product, this.props.params.colorCode)].sizes.map(sizeKey => (
+                <div key={`size_${sizeKey}`} className={''}
+                     onClick={this.handleSizeSelect.bind(null, sizeKey)}>{sizeKey}</div>
+              ))
+            }
             <div onClick={this.addProductToCart}>
               <FormattedMessage id="order"/>
             </div>

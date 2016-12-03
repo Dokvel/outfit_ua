@@ -11,7 +11,8 @@ const productColorSchema = new Schema({
   sourceProductLink: { type: 'String' },
   isSale: { type: 'Boolean', required: true, default: false },
   inactive: { type: 'Boolean', required: true, default: false },
-  photos: [productPhotoSchema]
+  photos: [productPhotoSchema],
+  sizes: []
 });
 
 const productSchema = new Schema({

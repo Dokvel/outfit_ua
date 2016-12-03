@@ -1,11 +1,13 @@
-import React, { Component, PropTypes } from 'react';
+import React, {Component, PropTypes} from 'react';
 
-import { injectIntl, FormattedMessage } from 'react-intl';
+import {injectIntl, FormattedMessage} from 'react-intl';
 import TextField from 'material-ui/TextField';
 import Checkbox from 'material-ui/Checkbox';
+import Toggle from 'material-ui/Toggle';
 import Dropzone from 'react-dropzone';
 import styles from './ProductColorForm.css';
-import { getProductFilesPath } from '../../../../util/productHelpers';
+import {getProductFilesPath} from '../../../../util/productHelpers';
+import sizes from '../../../../../common/data/sizes';
 
 class ProductColorForm extends Component {
   constructor(props) {
@@ -17,20 +19,26 @@ class ProductColorForm extends Component {
   }
 
   handleTextChange = (e) => {
-    this.onColorChange({ [e.target.name]: e.target.value });
+    this.onColorChange({[e.target.name]: e.target.value});
   };
 
   handleCheckboxChange = (event, value) => {
-    this.onColorChange({ [event.target.name]: value });
+    this.onColorChange({[event.target.name]: value});
   };
 
   onPhotosDrop = (acceptedFiles) => {
-    this.onColorChange({ filesPhotos: acceptedFiles });
+    this.onColorChange({filesPhotos: acceptedFiles});
   };
 
   onColorChange = (changes) => {
     this.setState(changes);
-    this.props.onChange({ ...this.state, ...changes })
+    this.props.onChange({...this.state, ...changes})
+  };
+  handleSizesChange = (sizeKey, event, toggled) => {
+    let sizes = this.state.sizes || [];
+    let i = sizes.indexOf(sizeKey);
+    toggled && i === -1 ? sizes.push(sizeKey) : sizes.splice(i, 1);
+    this.onColorChange({['sizes']: sizes});
   };
 
   render() {
@@ -58,6 +66,18 @@ class ProductColorForm extends Component {
           checked={this.state.isSale}
           label={this.props.intl.messages.productSale}
         /><br />
+        <div>
+          {
+            sizes.map((size) => {
+              let defaultToggled = this.props.product.cuid === undefined;
+              if (!defaultToggled) {
+                defaultToggled = this.state.sizes.indexOf(size.key) > -1;
+              }
+              return (<Toggle key={`size_${size.key}`} defaultToggled={defaultToggled} label={size.key}
+                              onToggle={this.handleSizesChange.bind(null, size.key)}/>)
+            })
+          }
+        </div>
         <div className={styles.photos}>
           <Dropzone onDrop={this.onPhotosDrop} accept="image/*" multiple={true}>
             <div>Try dropping some files here, or click to select files to upload.</div>
@@ -69,7 +89,9 @@ class ProductColorForm extends Component {
           }
           {this.state.photos && this.state.photos.length > 0 &&
           this.state.photos.map((photo) => (
-            <div className={styles.picture}><img src={`${getProductFilesPath(this.props.product)}/${photo.fileName}`}/></div>
+            <div key={`photo_${photo.fileName}`} className={styles.picture}>
+              <img src={`${getProductFilesPath(this.props.product)}/${photo.fileName}`}/>
+            </div>
           ))
           }
         </div >
@@ -89,12 +111,12 @@ ProductColorForm.propTypes = {
 };
 
 ProductColorForm.defaultProps = {
-  colorData: {
+  colorData: PropTypes.shape({
     inactive: false,
     isSale: false,
     code: '',
     sourceProductLink: ''
-  }
+  })
 };
 
 export

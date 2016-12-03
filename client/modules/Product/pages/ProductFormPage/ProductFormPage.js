@@ -1,6 +1,6 @@
-import React, { Component, PropTypes } from 'react';
-import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
-import { connect } from 'react-redux';
+import React, {Component, PropTypes} from 'react';
+import {injectIntl, intlShape, FormattedMessage} from 'react-intl';
+import {connect} from 'react-redux';
 
 import groups from '../../../../../common/data/groups';
 
@@ -9,30 +9,30 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import Checkbox from 'material-ui/Checkbox';
 import ProductColorForm from '../../components/ProductColorForm/ProductColorForm';
-import { Tabs, Tab } from 'material-ui/Tabs';
+import {Tabs, Tab} from 'material-ui/Tabs';
 
 import cuid from 'cuid';
 
 // Import Style
 import styles from './ProductFormPage.css';
 
-import { addProductRequest, updateProductRequest }from '../../ProductActions';
-import { getCategories } from '../../../Category/CategoryReducer';
-import { getProduct } from '../../ProductReducer';
+import {addProductRequest, updateProductRequest}from '../../ProductActions';
+import {getCategories} from '../../../Category/CategoryReducer';
+import {getProduct} from '../../ProductReducer';
 
 export class ProductFormPage extends Component {
   constructor(props) {
     super(props);
     this.state = props.product || {
-        colors: [{ cuid: cuid(), code: 'c01' }]
+        colors: [{cuid: cuid(), code: 'c01'}]
       }
   }
 
   onChange = (e) => {
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({[e.target.name]: e.target.value});
   };
 
-  addProduct = ()=> {
+  addProduct = () => {
 
     let form = new FormData();
     form.append('product[name]', this.state.name);
@@ -51,6 +51,10 @@ export class ProductFormPage extends Component {
           color.filesPhotos.forEach(file => {
             form.append(`product[colors][${color.cuid}][filesPhotos]`, file, file.name);
           });
+        } else if ('sizes' === colorDataKey) {
+          color.sizes.forEach(size => {
+            form.append(`product[colors][${color.cuid}][sizes]`, size);
+          });
         } else {
           form.append(`product[colors][${color.cuid}][${colorDataKey}]`, color[colorDataKey]);
         }
@@ -61,25 +65,25 @@ export class ProductFormPage extends Component {
   };
 
   handleSelectChange = (paramName, event, index, value) => {
-    return this.setState({ [paramName]: value });
+    return this.setState({[paramName]: value});
   };
 
   handleCheckboxChange = (event, value) => {
-    return this.setState({ [event.target.name]: value });
+    return this.setState({[event.target.name]: value});
   };
 
-  onAddColor = ()=> {
-    let { colors } = this.state;
-    colors.push({ code: 'new-color', cuid: cuid() });
-    this.setState({ colors });
+  onAddColor = () => {
+    let {colors} = this.state;
+    colors.push({code: 'new-color', cuid: cuid()});
+    this.setState({colors});
   };
 
-  onColorChanged = (colorKey, colorData)=> {
-    let { colors } = this.state;
+  onColorChanged = (colorKey, colorData) => {
+    let {colors} = this.state;
     const colorIndex = colors.map(o => o.cuid).indexOf(colorKey);
     if (colorIndex > -1) {
       colors[colorIndex] = colorData;
-      this.setState({ colors });
+      this.setState({colors});
     }
   };
 
@@ -95,7 +99,7 @@ export class ProductFormPage extends Component {
                 value={this.state.category}
                 onChange={this.handleSelectChange.bind(null, 'category')}>
                 {
-                  this.props.categories.map((category)=> {
+                  this.props.categories.map((category) => {
                     return (<MenuItem key={category.cuid} value={category.cuid} primaryText={category.name}/>)
                   })
                 }
@@ -121,7 +125,7 @@ export class ProductFormPage extends Component {
                 value={this.state.defaultColor}
                 onChange={this.handleSelectChange.bind(null, 'defaultColor')}>
                 {
-                  Object.keys(this.state.colors).map((colorKey)=> {
+                  Object.keys(this.state.colors).map((colorKey) => {
                     return (<MenuItem key={colorKey} value={colorKey} primaryText={this.state.colors[colorKey].code}/>)
                   })
                 }
@@ -169,7 +173,7 @@ export class ProductFormPage extends Component {
             </Tab>
             {
               this.state.colors.map(color => (
-                <Tab label={color.code || 'New Color'}>
+                <Tab key={`color_${color.code}`} label={color.code || 'New Color'}>
                   <ProductColorForm onChange={this.onColorChanged.bind(null, color.cuid)} colorData={color}
                                     product={this.state}/>
                 </Tab>

@@ -86,7 +86,7 @@ export function updateProduct(req, res) {
         existColors = document.colors.map(o => o.cuid);
 
         req.files.forEach((file) => {
-          var key = file.fieldname.split('[')[2].slice(0, -1);
+          let key = file.fieldname.split('[')[2].slice(0, -1);
           let existColorIndex = existColors.indexOf(key);
           if (existColorIndex > -1) {
             if (!document.colors[existColorIndex].photos) {
