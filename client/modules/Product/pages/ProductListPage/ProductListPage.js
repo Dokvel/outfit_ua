@@ -8,6 +8,8 @@ import ProductListItem from '../../components/ProductListItem/ProductListItem';
 
 import styles from './ProductListPage.css';
 
+import { Container, Content, Columns, Column } from 're-bulma';
+
 // Import Selectors
 import { getProducts } from '../../ProductReducer';
 import { getCategories } from '../../../Category/CategoryReducer';
@@ -22,22 +24,19 @@ class ProductListPage extends Component {
 
   render() {
     return (
-      <div className={styles.container}>
-        <div className={styles['filter-panel']}>
-          <CategoriesBar {...this.props}/>
-        </div>
-        <div className={styles.products}>
-          {
-            this.props.products.map(product=>(
-              <div key={product.cuid} className={styles.product}>
-                <ProductListItem key={product.cuid} {...product}
-                                 addProductToCart={this.addProductToCart.bind(null, product.cuid)}/>
-              </div>
-            ))
-          }
-        </div>
-
-      </div>
+      <Container>
+        <Columns>
+          <Column size="isOneQuarter">
+            <CategoriesBar {...this.props}/>
+          </Column>
+          <Column>
+            {
+              this.props.products.map(product => <ProductListItem key={product.cuid} {...product}
+                                                                  addProductToCart={this.addProductToCart.bind(null, product.cuid)}/>)
+            }
+          </Column>
+        </Columns>
+      </Container>
     )
   }
 }

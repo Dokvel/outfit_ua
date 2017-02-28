@@ -12,7 +12,7 @@ const shouldBeAdmin = (req, res, next) => {
   } else {
     next()
   }
-}
+};
 
 export default function (router, protectedMiddleware) {
 
@@ -34,6 +34,8 @@ export default function (router, protectedMiddleware) {
 
   var upload = multer({ storage: storage });
 
+  router.post('/products/order', ProductController.sendCart);
+  router.post('/products/parser', ProductController.parseProduct);
   router.get('/products', ProductController.getProducts);
   router.post('/products', protectedMiddleware, shouldBeAdmin, upload.any(), ProductController.addProduct);
   router.put('/products/:cuid', protectedMiddleware, shouldBeAdmin, upload.any(), ProductController.updateProduct);

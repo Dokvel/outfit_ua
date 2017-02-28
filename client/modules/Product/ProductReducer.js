@@ -55,5 +55,16 @@ export const getProducts = (state, group = '', category = '') => {
 // Get product by cuid
 export const getProduct = (state, cuid) => state.products.data.filter(product => product.cuid === cuid)[0];
 
+export const getProductPrice = (product, colorCUID) => {
+  let price = 0;
+  if (product && product.colors[colorCUID]) {
+    price = product.colors[colorCUID].price || product.price;
+    price = product.isSale || product.colors[colorCUID].isSale ? price * 0.95 : price;
+  } else {
+    price = product.isSale ? product.price * 0.95 : product.price;
+  }
+  return parseInt(price)
+};
+
 // Export Reducer
 export default ProductReducer;

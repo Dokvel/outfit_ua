@@ -7,17 +7,20 @@ const productPhotoSchema = new Schema({
 
 const productColorSchema = new Schema({
   cuid: { type: 'String', required: true },
+  name: { type: 'String' },
   code: { type: 'String', required: true },
   sourceProductLink: { type: 'String' },
   isSale: { type: 'Boolean', required: true, default: false },
   inactive: { type: 'Boolean', required: true, default: false },
   photos: [productPhotoSchema],
-  sizes: []
+  sizes: [],
+  price: { type: 'Number' }
 });
 
 const productSchema = new Schema({
   name: { type: 'String', required: true },
   code: { type: 'String', required: true },
+  sourceCode: { type: 'String'},
   description: { type: 'String', required: true },
   cuid: { type: 'String', required: true },
   price: { type: 'Number', required: true },

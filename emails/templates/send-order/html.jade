@@ -1,0 +1,14 @@
+extends ../layout
+block content
+    - var total = 0;
+    p Номер - #{order.number}
+    p Телефон - #{order.phone}
+    p Дата замовлення -  #{date.toLocaleString()}
+    each cartProduct in order.cartProducts
+        p
+            a(href='' + host + cartProduct.link) #{cartProduct.link}
+            |  (#{cartProduct.count} * #{cartProduct.price}) = #{cartProduct.price * cartProduct.count} грн.
+        - total += (cartProduct.price * cartProduct.count)
+    else
+        p There are no values
+    p Сума: #{total} грн.

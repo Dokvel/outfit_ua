@@ -1,0 +1,22 @@
+@import "../_common.scss";
+
+.description {
+  text-align: center;
+  line-height: 150%;
+  font-size: 14px;
+  color: #a7a7a7;
+  padding: 0 10%;
+}
+
+.question {
+  text-align: center;
+  line-height: 150%;
+  font-size: 30px;
+  color: $baseFontColor;
+}
+
+@media only screen and (max-width: 596px) {
+  .description {
+    padding: 0 10px;
+  }
+}

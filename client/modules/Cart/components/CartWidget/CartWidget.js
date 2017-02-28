@@ -1,74 +1,89 @@
 /**
  * Created by alex on 09.10.16.
  */
-import React, {PropTypes, Component} from 'react';
-import {connect} from 'react-redux';
-import {getCart, getOrdersAmount, parseProductPath, generateProductPath} from '../../CartReducer';
-import {getCategory} from '../../../Category/CategoryReducer';
-import {removeFromCart} from '../../CartActions';
-import {getProducts} from '../../../Product/ProductReducer'
-import {FormattedMessage} from 'react-intl';
-import {getProductFilesPath, getColorUuid} from '../../../../util/productHelpers';
+import React, { PropTypes, Component } from 'react';
+import { connect } from 'react-redux';
+import { getCart, getOrdersAmount, parseProductPath, generateProductPath } from '../../CartReducer';
+import { getCategory } from '../../../Category/CategoryReducer';
+import { removeFromCart, sendCart } from '../../CartActions';
+import { getProducts, getProductPrice } from '../../../Product/ProductReducer'
+import { FormattedMessage } from 'react-intl';
+import { getProductFilesPath, getColorUuid } from '../../../../util/productHelpers';
 import styles from "./CartWidget.css";
 
-import {
-  Table,
-  TableBody,
-  TableHeader,
-  TableHeaderColumn,
-  TableRow,
-  TableRowColumn,
-  TableFooter
-} from 'material-ui/Table';
-
+import { Table, Container, Thead, Th, Tr, Td, Tbody, Title, Input, Button, Addons } from 're-bulma';
 class CartWidget extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { phone: '' };
+  }
 
   removeProductFromCart = (cuid, colorCode, size) => {
     this.props.dispatch(removeFromCart(cuid, colorCode, size));
   };
 
+  sendOrder = () => {
+    if (this.state.phone) {
+      this.props.dispatch(sendCart(this.state.phone, this.props.cart));
+    }
+  };
+
+  onChange = (e) => {
+    this.setState({ [e.target.name]: e.target.value });
+  };
+
   render() {
     return (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHeaderColumn><FormattedMessage id="photo"/></TableHeaderColumn>
-            <TableHeaderColumn><FormattedMessage id="productCategory"/></TableHeaderColumn>
-            <TableHeaderColumn><FormattedMessage id="productPrice"/></TableHeaderColumn>
-            <TableHeaderColumn><FormattedMessage id="count"/></TableHeaderColumn>
-            <TableHeaderColumn><FormattedMessage id="actions"/></TableHeaderColumn>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+      <Container>
+        <Table>
+          <Thead>
+          <Tr>
+            <Th><FormattedMessage id="photo"/></Th>
+            <Th><FormattedMessage id="productCategory"/></Th>
+            <Th><FormattedMessage id="productPrice"/></Th>
+            <Th><FormattedMessage id="count"/></Th>
+            <Th><FormattedMessage id="actions"/></Th>
+          </Tr>
+          </Thead>
+          <Tbody>
           {
             this.props.cartProducts.map(params => {
               let product = this.props.products.filter(product => params.productCuid === product.cuid)[0];
               let colorUUID = getColorUuid(product, params.colorCode);
               return (
-                <TableRow>
-                  <TableRowColumn>
+                <Tr key={`${product.cuid}_${params.colorCode}_${params.sizeKey}`}>
+                  <Td>
                     <div className={styles.photo}>
                       <img src={`${getProductFilesPath(product)}/${product.colors[colorUUID].photos[0].fileName}`}/>
                     </div>
-                  </TableRowColumn>
-                  <TableRowColumn>{`${product.cuid} ${params.colorCode} ${params.sizeKey}`}</TableRowColumn>
-                  <TableRowColumn>{product.price} грн</TableRowColumn>
-                  <TableRowColumn>{this.props.cart[generateProductPath(params)].count}</TableRowColumn>
-                  <TableRowColumn>
+                  </Td>
+                  <Td>{`${product.cuid} ${params.colorCode} ${params.sizeKey}`}</Td>
+                  <Td>{getProductPrice(product, colorUUID)} грн</Td>
+                  <Td>{this.props.cart[generateProductPath(params)].count}</Td>
+                  <Td>
                     <span
                       onClick={this.removeProductFromCart.bind(null, product.cuid, params.colorCode, params.sizeKey)}>
                       Удалить
                     </span>
-                  </TableRowColumn>
-                </TableRow>
+                  </Td>
+                </Tr>
               )
             })
           }
-        </TableBody>
-        <TableFooter>
-          <div>Сумма заказа: {this.props.ordersAmount}</div>
-        </TableFooter>
-      </Table>
+          </Tbody>
+        </Table>
+          <Addons color="isInfo" hasAddonsRight>
+            <Title size="is3"> Сумма {this.props.ordersAmount} грн |</Title>
+            <Input
+              type="text"
+              placeholder="Номер телефона"
+              defaultValue={this.state.phone}
+              onChange={this.onChange}/>
+            <Button onClick={this.sendOrder}>
+              <FormattedMessage id="order"/>
+            </Button>
+          </Addons>
+      </Container>
     )
   }
 }

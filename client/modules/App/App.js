@@ -1,9 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { getProductsCount } from '../Cart/CartReducer';
-
-// Import Style
-import styles from './App.css';
+import { Section} from 're-bulma';
 
 // Import Components
 import Helmet from 'react-helmet';
@@ -11,8 +9,7 @@ import DevTools from './components/DevTools';
 import Header from '../../components/Header/Header';
 import Footer from './components/Footer/Footer';
 
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-
+import groups from '../../../common/data/groups';
 // Import Actions
 import { toggleAddPost } from './AppActions';
 import { fetchCategories } from '../Category/CategoryActions';
@@ -37,36 +34,33 @@ export class App extends Component {
 
   render() {
     return (
-      <MuiThemeProvider>
-        <div>
-          {/*this.state.isMounted && !window.devToolsExtension && process.env.NODE_ENV === 'development' && <DevTools />*/}
-          <div className={styles.container}>
-            <Helmet
-              title="outfit_ua - catalog"
-              titleTemplate="%s - outfit_ua - catalog"
-              meta={[
-                { charset: 'utf-8' },
-                {
-                  'http-equiv': 'X-UA-Compatible',
-                  content: 'IE=edge',
-                },
-                {
-                  name: 'viewport',
-                  content: 'width=device-width, initial-scale=1',
-                },
-              ]}
-            />
-            <Header
-              switchLanguage={lang => this.props.dispatch(switchLanguage(lang))}
-              intl={this.props.intl}
-              cartProductsCount={this.props.cartProductsCount}
-            />
-            <div>
-              {this.props.children}
-            </div>
-          </div>
-        </div>
-      </MuiThemeProvider>
+      <div>
+        {/*this.state.isMounted && !window.devToolsExtension && process.env.NODE_ENV === 'development' && <DevTools />*/}
+        <Helmet
+          title="outfit_ua - catalog"
+          titleTemplate="%s - outfit_ua - catalog"
+          meta={[
+            { charset: 'utf-8' },
+            {
+              'http-equiv': 'X-UA-Compatible',
+              content: 'IE=edge',
+            },
+            {
+              name: 'viewport',
+              content: 'width=device-width, initial-scale=1',
+            },
+          ]}
+        />
+        <Header
+          switchLanguage={lang => this.props.dispatch(switchLanguage(lang))}
+          intl={this.props.intl}
+          cartProductsCount={this.props.cartProductsCount}
+        />
+        <Section>
+          {this.props.children}
+        </Section>
+        <Footer/>
+      </div>
     );
   }
 }

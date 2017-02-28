@@ -1,13 +1,11 @@
 import Product from '../models/product';
+import Order from '../models/order';
 import cuid from 'cuid';
 
 import sanitizeHtml from 'sanitize-html';
-/**
- * Get all posts
- * @param req
- * @param res
- * @returns void
- */
+
+import { sendOrder } from '../../emails';
+
 export function getProducts(req, res) {
   Product.find().sort('name').exec((err, products) => {
     if (err) {
@@ -55,6 +53,7 @@ export function addProduct(req, res) {
     });
   }
 }
+
 export function updateProduct(req, res) {
   Product.findOne({ cuid: req.params.cuid })
     .then(document => {
@@ -99,10 +98,72 @@ export function updateProduct(req, res) {
         return document.save();
       }
     })
-    .then(saved=> {
+    .then(saved => {
       res.json({ product: saved });
     })
-    .catch(err=> {
+    .catch(err => {
       res.status(500).send(err);
     });
+}
+
+export function sendCart(req, res) {
+  let order = new Order({ ...req.body, number: 0 });
+  order.save()
+    .then(saved => {
+      order = saved;
+      return Product.find()
+    })
+    .then((products) => {
+      let cartProducts = Object.keys(req.body.cart).map((path) => {
+        let parsedPath = path.split('_');
+        let product = products.filter((item) => item.cuid === parsedPath[0])[0];
+        let colorUUID = getColorUuid(product, parsedPath[1]);
+        return {
+          productCuid: parsedPath[0],
+          colorCode: parsedPath[1],
+          sizeKey: parsedPath[2],
+          count: req.body.cart[path].count,
+          price: getProductPrice(product, colorUUID),
+          link: `/products/${parsedPath[0]}-${parsedPath[1]}`
+        };
+      });
+      sendOrder({
+        phone: order.phone,
+        cartProducts,
+        number: order.number
+      }, order.dateAdded, req.protocol + '://' + req.headers.host);
+      res.json({ order });
+    })
+    .catch(err => {
+      res.status(500).send(err);
+    });
+}
+
+const getProductPrice = (product, colorCUID) => {
+  let price = 0;
+  let color;
+  if (product && (color = product.colors.filter((color) => colorCUID == color.cuid)[0])) {
+    price = color.price || product.price;
+    price = product.isSale || color.isSale ? price * 0.95 : price;
+  } else {
+    price = product.isSale ? product.price * 0.95 : product.price;
+  }
+  return parseInt(price)
+};
+
+const getColorUuid = (product, colorCode) => {
+  let colorCUID;
+  product.colors.some((color, index, _ary) => {
+    if (color.code === colorCode) {
+      colorCUID = color.cuid;
+      return true;
+    }
+  });
+  return colorCUID;
+};
+
+export function parseProduct(req, res) {
+  if (req.body.product && req.body.product.url) {
+
+  }
 }

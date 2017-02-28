@@ -13,6 +13,7 @@ class ProductColorForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      sizes: [],
       ...this.props.colorData,
       filesPhotos: []
     };
@@ -54,6 +55,12 @@ class ProductColorForm extends Component {
           floatingLabelText={this.props.intl.messages.productSourceLink}
           defaultValue={this.state.sourceProductLink}
           onChange={this.handleTextChange} name="sourceProductLink"/><br />
+        <TextField
+          type="number"
+          fullWidth={true}
+          floatingLabelText={this.props.intl.messages.productPrice}
+          defaultValue={this.state.price}
+          onChange={this.handleTextChange} name="price"/><br />
         <Checkbox
           onCheck={this.handleCheckboxChange}
           name="inactive"
@@ -105,7 +112,8 @@ ProductColorForm.propTypes = {
     inactive: PropTypes.bool.isRequired,
     isSale: PropTypes.bool.isRequired,
     code: PropTypes.string.isRequired,
-    sourceProductLink: PropTypes.string.isRequired
+    sourceProductLink: PropTypes.string.isRequired,
+    price: PropTypes.number
   }).isRequired,
   onChange: PropTypes.func.isRequired
 };

@@ -1,9 +1,9 @@
 /**
  * Created by alex on 09.10.16.
  */
-import {ADD_TO_CART, REPLACE_CART, CACHE_KEY, REMOVE_FROM_CART} from './CartActions';
-import {getProduct} from '../Product/ProductReducer';
-import {getColorUuid} from '../../util/productHelpers';
+import { ADD_TO_CART, REPLACE_CART, CACHE_KEY, REMOVE_FROM_CART, CLEAR_CART } from './CartActions';
+import { getProduct, getProductPrice } from '../Product/ProductReducer';
+import { getColorUuid } from '../../util/productHelpers';
 
 // Initial State
 const initialState = {};
@@ -20,12 +20,12 @@ const CartReducer = (state = initialState, action) => {
         let product = state[path];
         newCart = {
           ...state,
-          [path]: {...product, count: product.count + 1}
+          [path]: { ...product, count: product.count + 1 }
         };
       } else {
         newCart = {
           ...state,
-          [path]: {count: 1}
+          [path]: { count: 1 }
         }
       }
 
@@ -39,11 +39,11 @@ const CartReducer = (state = initialState, action) => {
         let product = state[path];
         delete state[path];
         if (product.count < 2) {
-          newCart = {...state}
+          newCart = { ...state }
         } else {
           newCart = {
             ...state,
-            [path]: {...product, count: product.count - 1}
+            [path]: { ...product, count: product.count - 1 }
           }
         }
       }
@@ -52,6 +52,10 @@ const CartReducer = (state = initialState, action) => {
 
     case REPLACE_CART:
       return action.cart || state;
+
+    case CLEAR_CART:
+      localStorage.setItem(CACHE_KEY, JSON.stringify({}));
+      return initialState;
 
     default:
       return state;
@@ -64,9 +68,8 @@ export const generateProductPath = (params) => {
 
 export const parseProductPath = (path = '') => {
   let parsedPath = path.split('_');
-  return {productCuid: parsedPath[0], colorCode: parsedPath[1], sizeKey: parsedPath[2]};
+  return { productCuid: parsedPath[0], colorCode: parsedPath[1], sizeKey: parsedPath[2] };
 };
-
 
 /* Selectors */
 
@@ -84,7 +87,9 @@ export const getOrdersAmount = (state) => {
     let params = parseProductPath(key);
     let product = getProduct(state, params.productCuid);
     if (!product) return sum;
-    return sum + parseFloat(state.cart[key].count) * product.price;
+    let colorUUID = getColorUuid(product, params.colorCode);
+    let price = getProductPrice(product, colorUUID);
+    return sum + parseFloat(state.cart[key].count) * price;
   }, 0);
 };
 
